@@ -10,6 +10,7 @@ public class CutterCreater : MonoBehaviour {
 	bool _firstClick;
 
 	public Material _capMaterial;
+    public int _victimLayer;
 
 	// Use this for initialization
 	void Start () {
@@ -25,7 +26,6 @@ public class CutterCreater : MonoBehaviour {
 
 
 			if(_line && _firstClick){
-				Debug.Log("destroy");
 				Destroy(_line.gameObject);	
 			}			
 
@@ -55,10 +55,11 @@ public class CutterCreater : MonoBehaviour {
 			var ro = Vector3.Lerp(lineStartPos, lineEndPos, i/(float)rayNum);
 			ro.z = raydist/-2.0f;
 			Ray ray = new Ray(ro, transform.forward);
-			Debug.DrawRay (ray.origin, ray.direction * raydist, Color.red, 30.0f, false);
+			Debug.DrawRay (ray.origin, ray.direction * raydist, Color.red, 1.0f, false);
 			RaycastHit hit = new RaycastHit ();
 			if (Physics.Raycast (ray, out hit, raydist)) {
 				GameObject hitObject = hit.collider.gameObject;
+                if (hitObject.layer != _victimLayer) continue;
 
 				
 				if(!ListContainsGo(victims, hitObject)){
@@ -88,9 +89,16 @@ public class CutterCreater : MonoBehaviour {
                 mc.sharedMesh = null;
                 mc.sharedMesh = piece.GetComponent<MeshFilter>().mesh;
             }
+            mc.convex = true;
 
-			
-		}
+            var rb = piece.GetComponent<Rigidbody>();
+            if (rb == null)
+            {
+                rb = (Rigidbody)piece.AddComponent(typeof(Rigidbody));
+            }
+
+
+        }
 	}
 
 	bool ListContainsGo(List<GameObject> list, GameObject go){
